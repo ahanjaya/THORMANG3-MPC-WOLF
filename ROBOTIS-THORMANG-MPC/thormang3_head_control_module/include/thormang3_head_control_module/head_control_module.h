@@ -55,8 +55,11 @@ class HeadControlModule : public robotis_framework::MotionModule, public robotis
   bool isRunning();
 
  private:
-  const double SCAN_START_ANGLE = -10 * M_PI / 180;
-  const double SCAN_END_ANGLE = 85 * M_PI / 180;
+  // const double SCAN_START_ANGLE = -10 * M_PI / 180;
+  // const double SCAN_END_ANGLE   =  85 * M_PI / 180;
+
+  const double SCAN_START_ANGLE =  85 * M_PI / 180;
+  const double SCAN_END_ANGLE   = -10 * M_PI / 180;
 
   /* ROS Topic Callback Functions */
   void get3DLidarCallback(const std_msgs::String::ConstPtr &msg);

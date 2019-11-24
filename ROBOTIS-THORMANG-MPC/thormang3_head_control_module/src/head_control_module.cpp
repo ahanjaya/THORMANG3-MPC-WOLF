@@ -470,8 +470,7 @@ void HeadControlModule::beforeMoveLidar(double start_angle)
   double min_moving_time = 1.0;
 
   moving_time_ = (moving_time_ < min_moving_time) ? min_moving_time : moving_time_;
-
-  // moving_time_ = 1.0;
+  moving_time_ = 2.0;
 
   // set target joint angle : pitch
   target_position_ = goal_position_;
@@ -493,10 +492,8 @@ void HeadControlModule::startMoveLidar(double target_angle)
   // angle and moving time
   moving_time_ = fabs(current_position_.coeffRef(0, using_joint_name_["head_p"]) - target_angle) / (10 * DEGREE2RADIAN);
   double max_moving_time = 8.0;
-
   moving_time_ = (moving_time_ < max_moving_time) ? moving_time_ : max_moving_time;
-
-  // moving_time_ = 8.0;        // 8 secs
+  moving_time_ = 5.0;        // 8 secs
 
   // set target joint angle
   target_position_ = goal_position_;
