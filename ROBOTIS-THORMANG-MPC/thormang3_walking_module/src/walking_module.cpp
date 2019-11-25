@@ -219,10 +219,10 @@ void OnlineWalkingModule::queueThread()
   ros_node.setCallbackQueue(&callback_queue);
 
   /* publish topics */
-  robot_pose_pub_ = ros_node.advertise<thormang3_walking_module_msgs::RobotPose>("/robotis/walking/robot_pose_status", 1);
-  status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
+  robot_pose_pub_      = ros_node.advertise<thormang3_walking_module_msgs::RobotPose>("/robotis/walking/robot_pose_status", 1);
+  status_msg_pub_      = ros_node.advertise<robotis_controller_msgs::StatusMsg>("robotis/status", 1);
   pelvis_base_msg_pub_ = ros_node.advertise<geometry_msgs::PoseStamped>("/robotis/pelvis_pose_base_walking", 1);
-  done_msg_pub_ = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
+  done_msg_pub_        = ros_node.advertise<std_msgs::String>("/robotis/movement_done", 1);
 #ifdef WALKING_TUNE
   walking_joint_states_pub_ = ros_node.advertise<thormang3_walking_module_msgs::WalkingJointStatesStamped>("/robotis/walking/walking_joint_states", 1);
 #endif
@@ -1122,9 +1122,61 @@ void OnlineWalkingModule::robotPoseCallback(const thormang3_walking_module_msgs:
   online_walking->setInitialPose(r_foot[0], r_foot[1], r_foot[2], rf_euler[0], rf_euler[1], rf_euler[2],
                                  l_foot[0], l_foot[1], l_foot[2], lf_euler[0], lf_euler[1], lf_euler[2],
                                  c_body[0], c_body[1], c_body[2], c_euler[0], c_euler[1], c_euler[2]);
+
+  online_walking->hip_roll_feedforward_angle_rad_ = 0.0*M_PI/180.0;
+  online_walking->balance_ctrl_.setCOBManualAdjustment(-10.0*0.001, 0, 0);
+
+//   online_walking->initialize();
+//   online_walking->start();
+//   online_walking->process();
   online_walking->initialize();
+
+  process_mutex_.lock();
+  desired_matrix_g_to_cob_   = online_walking->mat_g_to_cob_;
+  desired_matrix_g_to_rfoot_ = online_walking->mat_g_to_rfoot_;
+  desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;
+  process_mutex_.unlock();
+
+  result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
+  result_["r_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[1];
+  result_["r_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[2];
+  result_["r_leg_kn_p"]->goal_position_  = online_walking->out_angle_rad_[3];
+  result_["r_leg_an_p"]->goal_position_  = online_walking->out_angle_rad_[4];
+  result_["r_leg_an_r"]->goal_position_  = online_walking->out_angle_rad_[5];
+
+  result_["l_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[6];
+  result_["l_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[7];
+  result_["l_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[8];
+  result_["l_leg_kn_p" ]->goal_position_ = online_walking->out_angle_rad_[9];
+  result_["l_leg_an_p" ]->goal_position_ = online_walking->out_angle_rad_[10];
+  result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
+
   online_walking->start();
   online_walking->process();
+
+  previous_running_ = isRunning();
+
+  online_walking->hip_roll_feedforward_angle_rad_ = 0.0;
+  online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.d_gain_ = 0;
+  online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_ = 0;
+
+  online_walking->balance_ctrl_.foot_roll_angle_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.foot_roll_angle_ctrl_.d_gain_ = 0;
+  online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.d_gain_ = 0;
+
+  online_walking->balance_ctrl_.right_foot_force_x_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_force_x_ctrl_.d_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_force_y_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_force_y_ctrl_.d_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_force_z_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_force_z_ctrl_.d_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.d_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.p_gain_ = 0;
+  online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.d_gain_ = 0;
 }
 
 

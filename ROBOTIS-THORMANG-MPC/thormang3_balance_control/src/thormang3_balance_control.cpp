@@ -22,6 +22,7 @@
  */
 
 #include <iostream>
+#include <stdio.h>
 #include "thormang3_balance_control/thormang3_balance_control.h"
 
 using namespace thormang3;
@@ -288,6 +289,8 @@ void BalanceControlUsingDampingConroller::setForceTorqueBalanceEnable(bool enabl
 
 void BalanceControlUsingDampingConroller::process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified)
 {
+  std::cout << "hanjaya mandala" << std::endl;
+
   balance_control_error_ = BalanceControlError::NoError;
 
   pose_cob_adjustment_.fill(0);
@@ -702,7 +705,6 @@ void BalanceControlUsingPDController::process(int *balance_error, Eigen::MatrixX
   double left_foot_force_z_filtered      = left_foot_force_z_lpf_.getFilteredOutput(current_left_fz_N_);
   double left_foot_torque_roll_filtered  = left_foot_torque_roll_lpf_.getFilteredOutput(current_left_tx_Nm_);
   double left_foot_torque_pitch_filtered = left_foot_torque_pitch_lpf_.getFilteredOutput(current_left_ty_Nm_);
-
 
   // gyro
   foot_roll_adjustment_by_gyro_roll_   = -0.1*gyro_enable_*foot_roll_gyro_ctrl_.getFeedBack(roll_gyro_filtered);

@@ -28,6 +28,7 @@
 #include <vector>
 #include <ros/ros.h>
 #include <ros/package.h>
+#include "thormang3_walking_module_msgs/PoseXYZRPY.h"
 #include <boost/thread.hpp>
 #include <eigen3/Eigen/Eigen>
 #include <yaml-cpp/yaml.h>
@@ -102,6 +103,8 @@ public:
   int balance_error_;
   thormang3::BalanceControlUsingPDController balance_ctrl_;
 
+  /* ROS Topic Publish Functions */
+  ros::Publisher robot_des_balance_pub_;
 
   // sensor value
   double current_right_fx_N_,  current_right_fy_N_,  current_right_fz_N_;
@@ -210,6 +213,9 @@ private:
   double reference_time_;  //Absolute Time
   int balancing_index_;
   int current_step_data_status_;
+
+  thormang3_walking_module_msgs::PoseXYZRPY  des_pose_msg_;
+  
 };
 
 }

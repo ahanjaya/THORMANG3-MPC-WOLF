@@ -24,9 +24,7 @@
 #include <stdio.h>
 #include "thormang3_walking_module/thormang3_online_walking.h"
 
-
 using namespace thormang3;
-
 
 static const double MMtoM = 0.001;
 static const double MStoS = 0.001;
@@ -58,7 +56,6 @@ static const int StepDataStatus1 = 1; //
 static const int StepDataStatus2 = 2; //
 static const int StepDataStatus3 = 3; //
 static const int StepDataStatus4 = 4; //
-
 
 THORMANG3OnlineWalking::THORMANG3OnlineWalking()
 {
@@ -210,6 +207,9 @@ THORMANG3OnlineWalking::THORMANG3OnlineWalking()
   quat_current_imu_.x() = sin(0.5*M_PI);
   quat_current_imu_.y() = 0;
   quat_current_imu_.z() = 0;
+
+  ros::NodeHandle  ros_node;
+  robot_des_balance_pub_ = ros_node.advertise<thormang3_walking_module_msgs::PoseXYZRPY>("/robotis/walking/des_balance", 1);
 }
 
 THORMANG3OnlineWalking::~THORMANG3OnlineWalking()
@@ -340,6 +340,7 @@ void THORMANG3OnlineWalking::initialize()
   mat_robot_to_lfoot_ = mat_robot_to_g_*mat_g_to_lfoot_;
 
   balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
+
   mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
 
   rhip_to_rfoot_pose_ = robotis_framework::getPose3DfromTransformMatrix((mat_rhip_to_cob_ * mat_cob_to_robot_modified_) * mat_robot_to_rf_modified_);
@@ -1598,6 +1599,7 @@ void THORMANG3OnlineWalking::process()
     balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
 
     balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
+
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
 
@@ -1813,25 +1815,25 @@ void THORMANG3OnlineWalking::setBalanceOffset()
   if (init_balance_offset_)
   {
     double cur_time = (double) mov_step_ * TIME_UNIT;
-//    ROS_INFO("cur_time : %f / %f", cur_time , mov_time_);
+  //  ROS_INFO("cur_time : %f / %f", cur_time , mov_time_);
 
     if (is_DSP == false)
     {
-//      ROS_INFO("SSP");
+    //  ROS_INFO("SSP");
       std::vector<double_t> value = feed_forward_tra_->getPosition(cur_time);
 
       if (is_l_balancing)
       {
         des_balance_offset_.coeffRef(0,0) = r_leg_to_body_roll_gain_ * value[0];
         des_balance_offset_.coeffRef(1,0) = r_leg_to_body_pitch_gain_ * value[0];
-//        ROS_INFO("L_BALANCING");
+      //  ROS_INFO("L_BALANCING");
       }
 
       if (is_r_balancing)
       {
         des_balance_offset_.coeffRef(0,0) = l_leg_to_body_roll_gain_ * value[0];
         des_balance_offset_.coeffRef(1,0) = l_leg_to_body_pitch_gain_ * value[0];
-//        ROS_INFO("R_BALANCING");
+      //  ROS_INFO("R_BALANCING");
       }
     }
 
@@ -1843,6 +1845,9 @@ void THORMANG3OnlineWalking::setBalanceOffset()
     else
       mov_step_++;
 
-//    ROS_INFO("des_balance_offset_ roll: %f, pitch: %f", des_balance_offset_.coeff(0,0), des_balance_offset_.coeff(1,0));
+    // ROS_INFO("des_balance_offset_ roll: %f, pitch: %f", des_balance_offset_.coeff(0,0), des_balance_offset_.coeff(1,0));
+    des_pose_msg_.roll  = des_balance_offset_.coeff(0,0);
+    des_pose_msg_.pitch = des_balance_offset_.coeff(1,0);
+    robot_des_balance_pub_.publish(des_pose_msg_);
   }
 }
