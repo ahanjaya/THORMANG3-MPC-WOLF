@@ -1113,9 +1113,9 @@ void OnlineWalkingModule::robotPoseCallback(const thormang3_walking_module_msgs:
                                 msg->global_to_center_of_body.orientation.y, msg->global_to_center_of_body.orientation.z);
   Eigen::Vector3d c_euler = rotation2rpy(c_body_ori.toRotationMatrix());
 
-  // ROS_INFO_STREAM(r_foot);
-  // ROS_INFO_STREAM(l_foot);
-  // ROS_INFO_STREAM(c_euler);
+  ROS_INFO_STREAM(r_foot);
+  ROS_INFO_STREAM(l_foot);
+  ROS_INFO_STREAM(c_body);
 
   THORMANG3OnlineWalking *online_walking = THORMANG3OnlineWalking::getInstance();
   online_walking->stop();
@@ -1126,59 +1126,10 @@ void OnlineWalkingModule::robotPoseCallback(const thormang3_walking_module_msgs:
   online_walking->hip_roll_feedforward_angle_rad_ = 0.0*M_PI/180.0;
   online_walking->balance_ctrl_.setCOBManualAdjustment(-10.0*0.001, 0, 0);
 
-//   online_walking->initialize();
-//   online_walking->start();
-//   online_walking->process();
   online_walking->initialize();
-
-  process_mutex_.lock();
-  desired_matrix_g_to_cob_   = online_walking->mat_g_to_cob_;
-  desired_matrix_g_to_rfoot_ = online_walking->mat_g_to_rfoot_;
-  desired_matrix_g_to_lfoot_ = online_walking->mat_g_to_lfoot_;
-  process_mutex_.unlock();
-
-  result_["r_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[0];
-  result_["r_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[1];
-  result_["r_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[2];
-  result_["r_leg_kn_p"]->goal_position_  = online_walking->out_angle_rad_[3];
-  result_["r_leg_an_p"]->goal_position_  = online_walking->out_angle_rad_[4];
-  result_["r_leg_an_r"]->goal_position_  = online_walking->out_angle_rad_[5];
-
-  result_["l_leg_hip_y"]->goal_position_ = online_walking->out_angle_rad_[6];
-  result_["l_leg_hip_r"]->goal_position_ = online_walking->out_angle_rad_[7];
-  result_["l_leg_hip_p"]->goal_position_ = online_walking->out_angle_rad_[8];
-  result_["l_leg_kn_p" ]->goal_position_ = online_walking->out_angle_rad_[9];
-  result_["l_leg_an_p" ]->goal_position_ = online_walking->out_angle_rad_[10];
-  result_["l_leg_an_r" ]->goal_position_ = online_walking->out_angle_rad_[11];
-
   online_walking->start();
   online_walking->process();
-
-  previous_running_ = isRunning();
-
-  online_walking->hip_roll_feedforward_angle_rad_ = 0.0;
-  online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.foot_roll_gyro_ctrl_.d_gain_ = 0;
-  online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.foot_pitch_gyro_ctrl_.d_gain_ = 0;
-
-  online_walking->balance_ctrl_.foot_roll_angle_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.foot_roll_angle_ctrl_.d_gain_ = 0;
-  online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.foot_pitch_angle_ctrl_.d_gain_ = 0;
-
-  online_walking->balance_ctrl_.right_foot_force_x_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_force_x_ctrl_.d_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_force_y_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_force_y_ctrl_.d_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_force_z_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_force_z_ctrl_.d_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_torque_roll_ctrl_.d_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.p_gain_ = 0;
-  online_walking->balance_ctrl_.right_foot_torque_pitch_ctrl_.d_gain_ = 0;
 }
-
 
 void OnlineWalkingModule::onModuleEnable()
 {

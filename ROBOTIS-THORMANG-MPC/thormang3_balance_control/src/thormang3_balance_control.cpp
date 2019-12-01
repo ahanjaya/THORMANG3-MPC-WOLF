@@ -289,8 +289,6 @@ void BalanceControlUsingDampingConroller::setForceTorqueBalanceEnable(bool enabl
 
 void BalanceControlUsingDampingConroller::process(int *balance_error, Eigen::MatrixXd *robot_to_cob_modified, Eigen::MatrixXd *robot_to_right_foot_modified, Eigen::MatrixXd *robot_to_left_foot_modified)
 {
-  std::cout << "hanjaya mandala" << std::endl;
-
   balance_control_error_ = BalanceControlError::NoError;
 
   pose_cob_adjustment_.fill(0);

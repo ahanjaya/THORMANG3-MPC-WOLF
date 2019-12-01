@@ -1599,6 +1599,7 @@ void THORMANG3OnlineWalking::process()
     balance_ctrl_.setDesiredPose(mat_robot_to_cob_, mat_robot_to_rfoot_, mat_robot_to_lfoot_);
 
     balance_ctrl_.process(&balance_error_, &mat_robot_to_cob_modified_, &mat_robot_to_rf_modified_, &mat_robot_to_lf_modified_);
+    // ROS_INFO_STREAM("balance_error_: " << balance_error_);
 
     mat_cob_to_robot_modified_ = robotis_framework::getInverseTransformation(mat_robot_to_cob_modified_);
     //Stabilizer End
@@ -1846,8 +1847,8 @@ void THORMANG3OnlineWalking::setBalanceOffset()
       mov_step_++;
 
     // ROS_INFO("des_balance_offset_ roll: %f, pitch: %f", des_balance_offset_.coeff(0,0), des_balance_offset_.coeff(1,0));
-    des_pose_msg_.roll  = des_balance_offset_.coeff(0,0);
-    des_pose_msg_.pitch = des_balance_offset_.coeff(1,0);
+    des_pose_msg_.roll  = present_body_pose_.roll + des_balance_offset_.coeff(0,0);
+    des_pose_msg_.pitch = present_body_pose_.pitch + des_balance_offset_.coeff(1,0);
     robot_des_balance_pub_.publish(des_pose_msg_);
   }
 }

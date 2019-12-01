@@ -66,6 +66,7 @@ class HeadControlModule : public robotis_framework::MotionModule, public robotis
   void get3DLidarRangeCallback(const std_msgs::Float64::ConstPtr &msg);
   void setHeadJointCallback(const sensor_msgs::JointState::ConstPtr &msg);
   void setHeadJointTimeCallback(const thormang3_head_control_module_msgs::HeadJointPose::ConstPtr &msg);
+  void setOriginalPosLidarCallback(const std_msgs::Float64::ConstPtr &msg);
 
   void queueThread();
   void jointTraGeneThread();

@@ -86,14 +86,16 @@ void HeadControlModule::queueThread()
   ros_node.setCallbackQueue(&callback_queue);
 
   /* subscribe topics */
-  ros::Subscriber get_3d_lidar_sub = ros_node.subscribe("/robotis/head_control/move_lidar", 1,
+  ros::Subscriber get_3d_lidar_sub        = ros_node.subscribe("/robotis/head_control/move_lidar", 1,
                                                         &HeadControlModule::get3DLidarCallback, this);
-  ros::Subscriber get_3d_lidar_range_sub = ros_node.subscribe("/robotis/head_control/move_lidar_with_range", 1,
+  ros::Subscriber get_3d_lidar_range_sub  = ros_node.subscribe("/robotis/head_control/move_lidar_with_range", 1,
                                                               &HeadControlModule::get3DLidarRangeCallback, this);
-  ros::Subscriber set_head_joint_sub = ros_node.subscribe("/robotis/head_control/set_joint_states", 1,
+  ros::Subscriber set_head_joint_sub      = ros_node.subscribe("/robotis/head_control/set_joint_states", 1,
                                                           &HeadControlModule::setHeadJointCallback, this);
   ros::Subscriber set_head_joint_time_sub = ros_node.subscribe("/robotis/head_control/set_joint_states_time", 1,
                                                                &HeadControlModule::setHeadJointTimeCallback, this);
+  ros::Subscriber set_original_pos_lidar_sub = ros_node.subscribe("/robotis/head_control/set_original_pos_lidar", 1,
+                                                               &HeadControlModule::setOriginalPosLidarCallback, this);
 
   ros::WallDuration duration(control_cycle_msec_ / 1000.0);
   while (ros_node.ok())
@@ -287,6 +289,12 @@ void HeadControlModule::setHeadJointTimeCallback(const thormang3_head_control_mo
   // generate trajectory
   tra_gene_thread_ = new boost::thread(boost::bind(&HeadControlModule::jointTraGeneThread, this));
   delete tra_gene_thread_;
+}
+
+void HeadControlModule::setOriginalPosLidarCallback(const std_msgs::Float64::ConstPtr &msg)
+{
+  original_position_lidar_ = msg->data * M_PI / 180;
+  ROS_INFO_STREAM("override original poisition lidar: " << original_position_lidar_);
 }
 
 void HeadControlModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
